@@ -1,5 +1,7 @@
 # Installation
 
+Publication of the proposed `nixfred/omarchy-mycelium` remote is pending. The Git commands below become usable after that repository is created and pushed; they are not a claim that it currently exists.
+
 ## New Git-managed installation
 
 Use the Omarchy plugin CLI in a normal desktop terminal:
