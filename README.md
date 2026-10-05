@@ -1,7 +1,5 @@
 # Mycelium
 
-> **Publication pending:** the proposed `nixfred/omarchy-mycelium` GitHub repository has not been created. The Git install commands below are the intended workflow after publication. This local source is ready for review.
-
 ![Mycelium — the space between your windows is alive](docs/images/hero.svg)
 
 **A living window map for your Omarchy desktop.** Mycelium grows quiet roots in the gaps around your windows. Switch apps and a short focus pulse travels through an observed connection. Open, close or move a window and the roots reshape themselves. Open **Trace** when you want to see the map and enter an app or workspace.
