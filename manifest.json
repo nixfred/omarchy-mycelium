@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "id": "nixfred.mycelium",
+  "name": "Mycelium",
+  "version": "0.3.0",
+  "author": "Fred Nix",
+  "license": "MIT",
+  "description": "Roots in real window gaps respond to focus and layout changes. Trace explains their state and navigates actual apps/workspaces. Standalone and local.",
+  "kinds": [
+    "service",
+    "overlay",
+    "bar-widget"
+  ],
+  "entryPoints": {
+    "service": "v3/Service.qml",
+    "overlay": "v3/Trace.qml",
+    "barWidget": "v3/Widget.qml"
+  },
+  "barWidget": {
+    "displayName": "Mycelium",
+    "description": "Click Trace; right-click Pause or Resume.",
+    "category": "System",
+    "defaultSection": "right"
+  },
+  "keepLoaded": true
+}

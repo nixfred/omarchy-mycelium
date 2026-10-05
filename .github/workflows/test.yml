@@ -1,0 +1,23 @@
+name: Tests
+on: [push, pull_request]
+permissions:
+  contents: read
+jobs:
+  portable:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Runtime and public assets
+        run: |
+          python3 tools/verify-runtime.py
+          python3 tools/check-project.py
+      - name: Bridge and watch loop
+        run: python3 -m unittest discover -s tests -p 'test_*.py'
+      - name: Geometry and resource gates
+        run: |
+          node tests/test_topology.js
+          node tests/test_tiled.js
+          node tests/test_resources.js

@@ -1,0 +1,13 @@
+__pycache__/
+*.pyc
+local-evidence/
+# Preserved local handoff artifacts are never published.
+PROVENANCE.json
+release/
+review/
+docs/evidence/
+docs/MANUAL-INSTALL.md
+docs/REVIEW.md
+docs/TESTING.md
+tools/install-vic.py
+tools/verify-release.py
