@@ -14,7 +14,7 @@ The manifest ID is `nixfred.mycelium`. The plugin has a service, an explicit ove
 omarchy plugin update nixfred.mycelium
 ```
 
-You can review before enabling by omitting `--enable`, then run `omarchy plugin enable nixfred.mycelium` yourself. Disabling uses `omarchy plugin disable nixfred.mycelium`. The shell discovers the versioned v4 QML entry points; no whole-shell restart is part of the normal install route.
+You can review before enabling by omitting `--enable`, then run `omarchy plugin enable nixfred.mycelium` yourself. Disabling uses `omarchy plugin disable nixfred.mycelium`. The shell discovers the versioned v4 QML entry points and hot-reloads the plugin, service included; no whole-shell restart is part of the normal install or update route. Versions before 0.4 kept their service mounted across hot-reloads, so the first update from 0.3 can leave the old service running: if `omarchy-shell nixfred.mycelium state` does not report `"version":4`, run `omarchy restart shell` once.
 
 ## Source checkout
 
@@ -29,5 +29,5 @@ For a clean destination, Omarchy also documents manual installation: place only 
 
 ## Existing manual installation
 
-`plugin add` refuses an existing plugin destination. Do not overwrite an active plugin with a repository clone or restore an old whole shell configuration. First preserve the current plugin and its current placement/settings. Update the plugin in place instead: copy the validated `v4/` folder and `bridge.py` first, then `manifest.json` last, so the shell switches entry points once. The plugin ID does not change, so the bar widget keeps its place and settings. Older `v2/` or `v3/` folders can be removed afterwards. Restart the shell once (`omarchy restart shell`) so the plugin's IPC target is fresh.
+`plugin add` refuses an existing plugin destination. Do not overwrite an active plugin with a repository clone or restore an old whole shell configuration. First preserve the current plugin and its current placement/settings. Update the plugin in place instead: copy the validated `v4/` folder and `bridge.py` first, then `manifest.json` last, so the shell switches entry points once. The plugin ID does not change, so the bar widget keeps its place and settings. Older `v2/` or `v3/` folders can be removed afterwards. The manifest no longer asks to stay mounted, so the next plugin reload swaps in the new service; check with `omarchy-shell nixfred.mycelium state`, and restart the shell once only if it does not report version 4.
 

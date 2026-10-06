@@ -31,4 +31,9 @@ for (const args of [[false,true,{animating:true},{}],[true,false,{animating:true
   [true,true,{animating:false},{}],[true,true,{animating:true},{off:true}],
   [true,true,{animating:true},{fullscreen:true}]]) assert.equal(motion(...args),false);
 assert(source.includes('mask:Region {}') && source.includes('WlrKeyboardFocus.None'));
-console.log('PASS QML geometry and render gates: test mode, paused, idle, still keeps geometry, outage, no output, off, fullscreen, hidden workspace, multi-output, hidden renderer');
+// keepLoaded keeps a service mounted across plugin hot-reload (meant for the
+// lock screen). Here it would stop `omarchy plugin update` from ever reaching
+// the running service, leaving an old service under a new widget and Trace.
+const manifest = JSON.parse(fs.readFileSync(__dirname + '/../manifest.json', 'utf8'));
+assert.notEqual(manifest.keepLoaded, true, 'updates must reach the running service');
+console.log('PASS QML geometry and render gates: test mode, paused, idle, still keeps geometry, outage, no output, off, fullscreen, hidden workspace, multi-output, hidden renderer; manifest lets updates reach the service');

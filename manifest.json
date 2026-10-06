@@ -21,6 +21,5 @@
     "description": "Click Trace; right-click Pause or Resume.",
     "category": "System",
     "defaultSection": "right"
-  },
-  "keepLoaded": true
+  }
 }
