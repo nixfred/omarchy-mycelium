@@ -4,7 +4,7 @@
   <rect width="1440" height="280" rx="18" fill="#0b1924"/>
   <g fill="#102633" stroke="#31545e"><rect x="30" y="38" width="412" height="202" rx="12"/><rect x="514" y="38" width="412" height="202" rx="12"/><rect x="998" y="38" width="412" height="202" rx="12"/></g>
   <g fill="#62dfcc" font-family="Arial,sans-serif" font-weight="700" font-size="13" letter-spacing="3"><text x="58" y="78">01 / OBSERVE</text><text x="542" y="78">02 / GROW</text><text x="1026" y="78">03 / CHOOSE</text></g>
-  <g fill="#e1f4f2" font-family="Arial,sans-serif" font-weight="700" font-size="25"><text x="58" y="125">Actual desktop events</text><text x="542" y="125">The empty space</text><text x="1026" y="125">Explicit Trace clicks</text></g>
-  <g fill="#91afb9" font-family="Arial,sans-serif" font-size="17"><text x="58" y="169">Geometry · focus · groups · attention</text><text x="58" y="198">No titles or application contents</text><text x="542" y="169">Bounded roots in window gaps</text><text x="542" y="198">Ambient pointer input passes through</text><text x="1026" y="169">Live app IDs and workspace targets</text><text x="1026" y="198">Pages keep cards inside the screen</text></g>
+  <g fill="#e1f4f2" font-family="Arial,sans-serif" font-weight="700" font-size="25"><text x="58" y="125">Actual desktop events</text><text x="542" y="125">The seams</text><text x="1026" y="125">Explicit Trace clicks</text></g>
+  <g fill="#91afb9" font-family="Arial,sans-serif" font-size="17"><text x="58" y="169">Geometry · focus · groups · attention</text><text x="58" y="198">No titles or application contents</text><text x="542" y="169">Roots on seams, at any gap size</text><text x="542" y="198">Ambient pointer input passes through</text><text x="1026" y="169">Every workspace, any window</text><text x="1026" y="198">Pages keep the map on screen</text></g>
   <g stroke="#60d3c6" stroke-width="2" fill="none"><path d="M457 137h39m-9-8 9 8-9 8 M941 137h39m-9-8 9 8-9 8"/></g>
 </svg>

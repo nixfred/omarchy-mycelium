@@ -2,7 +2,7 @@ from runtime_paths import omarchy_path,private_x_display
 """Real Wayland types load hidden, without mapping test surfaces or input."""
 import os,json,shutil,subprocess,tempfile
 from pathlib import Path
-BASE=Path(__file__).resolve().parents[1];ROOT=Path(os.environ.get('MYCELIUM_CANDIDATE',str(BASE))).resolve();module=next((m for m in ('v3','v2') if (ROOT/m).exists()),'v1')
+BASE=Path(__file__).resolve().parents[1];ROOT=Path(os.environ.get('MYCELIUM_CANDIDATE',str(BASE))).resolve();module=next((m for m in ('v4','v3','v2') if (ROOT/m).exists()),'v1')
 with tempfile.TemporaryDirectory(prefix='mycelium-hidden-') as tmp:
  work=Path(tmp);shell=omarchy_path()/'shell'
  for name in ('Commons','Ui','services'):(work/name).symlink_to(shell/name,target_is_directory=True)

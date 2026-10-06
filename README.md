@@ -1,12 +1,34 @@
 # Mycelium
 
-![Mycelium — the space between your windows is alive](docs/images/hero.svg)
+![Mycelium: the seams between your windows are alive](docs/images/hero.svg)
 
-**A living window map for your Omarchy desktop.** Mycelium grows quiet roots in the gaps around your windows. Switch apps and a short focus pulse travels through an observed connection. Open, close or move a window and the roots reshape themselves. Open **Trace** when you want to see the map and enter an app or workspace.
+**A living window map for your Omarchy desktop.** Quiet roots grow along the seams where your tiled windows meet, at any gap size, including none. Switch windows and a root grows around the one you picked. When an app needs you, its seams turn amber. Open **Trace** to see every workspace at once and jump straight to any window.
 
-It is a standalone native QML plugin for **Omarchy Quattro + Hyprland**. There is no Infomarchy dependency or adapter. Colors follow your Omarchy theme.
+It is a standalone native QML plugin for **Omarchy Quattro + Hyprland**. There is no Infomarchy dependency, and colors follow your Omarchy theme.
 
-The screenshots below are the actual native v3 renderer with invented geometry and app metadata. They contain no real application contents or identifying desktop data. The banner and flow diagram are original SVG artwork. **Version 0.3.0 is tested and ready; activation on the development desktop is still pending.**
+## Why seams
+
+Version 0.3 grew roots in the empty space between windows. Real tiling layouts barely have any: a common setup leaves 9 px at the screen edge and 12 px between windows, many people run zero gaps, and one window per workspace leaves only the outer margin. In those layouts nothing visible was drawn.
+
+Every tiled layout has **seams**, though: the lines where windows meet each other and the screen edge. Version 0.4 puts each window side's root in the middle of whatever space that side faces, so neighbouring roots meet on the same line. With gaps, the root sits in the gap and can wave a little. With no gaps, it is a clean line on the shared border.
+
+![Actual native render at 1:1: a wavy focus root in a 12 px gap and an urgent window's amber seams](docs/images/native-seams.png)
+
+![The same layout with zero gaps: straight seams on the 1 px borders](docs/images/native-zero-gap.png)
+
+The pixel tests render real tiling geometry (zero gaps, 9/12 px gaps, one window and a floating window) and require that **not a single pixel inside a window changes** while thousands of seam pixels do.
+
+## What the roots tell you
+
+| You see | It means |
+| --- | --- |
+| Faint seams across the workspace | Your current layout |
+| A root growing around a window | Focus just moved there; it grows from the side facing the window you left |
+| A spark running along the seams | Focus jumped between windows that do not touch |
+| Amber seams, one slowly pulsing | A window wants attention; only one thing on screen ever pulses |
+| Seams fading and growing back | The layout changed or the workspace switched; roots wait for windows to settle |
+
+Motion only answers an event and stops within about a second. **Still** keeps the roots without any animation. Floating windows and an open scratchpad cover the roots, and nothing is ever drawn across them.
 
 ## Install
 
@@ -16,67 +38,50 @@ You need an existing Omarchy Quattro desktop, Hyprland, Quickshell, Python 3, Gi
 omarchy plugin add https://github.com/nixfred/omarchy-mycelium.git --enable
 ```
 
-Follow Omarchy's review and installation prompts. A branching stem appears in the right section of the bar. Its left click opens Trace; its right click toggles Pause. For future Git-managed updates:
+Follow Omarchy's review and installation prompts. A branching stem appears in the right section of the bar. Left-click it to open Trace; right-click to pause or resume. Its dot turns amber when any workspace has a window that wants attention. Update later with:
 
 ```bash
 omarchy plugin update nixfred.mycelium
 ```
 
-Already have a manually copied Mycelium installation? Use the [existing-installation guide](docs/INSTALL.md#existing-manual-installation) to preserve your layout. Omarchy's Git `add` command refuses an occupied destination.
+Already have a manually copied Mycelium? See the [existing-installation guide](docs/INSTALL.md#existing-manual-installation).
 
-## Read the space between your windows
+## Trace: every workspace at a glance
 
-![Native Trace roots around eight synthetic windows, with real application icons and workspace portals](docs/images/native-trace.png)
+![Native Trace with four workspaces, real app icons, an urgent window in amber and hop roots along the gutters](docs/images/native-trace.png)
 
-Roots follow available negative space around actual window rectangles. A structural root is visual structure. A focus link records an observed switch between live windows. A group link reflects a compositor window group. A pulse shows a recent focus change; amber means attention.
-
-Those connections do not claim that applications exchanged content or communicated with each other. Mycelium does not read window titles, pixels inside applications, audio or clipboard data.
-
-![Observe real events, grow roots in empty space, and navigate only through explicit Trace clicks](docs/images/how-it-works.svg)
-
-## Find your way with Trace
-
-Left-click the bar stem, choose an app card or a workspace portal, and Trace closes as that explicit action enters the target. Keyboard focus stays with your application while the map is open. **Done** or empty background dismisses Trace.
+Trace draws every workspace as a miniature of its monitor, with each window in place and labelled by its app icon and name. The workspace you are on is highlighted, the focused window is outlined and urgent windows are amber. The gutters between tiles are seams too: bright roots along them link the workspaces you moved between recently.
 
 | Control | Result |
 | --- | --- |
 | Bar stem: left click | Open Trace |
 | Bar stem: right click | Pause or resume ambient roots |
-| App card / workspace portal | Enter that live app or workspace |
-| Previous / Next | Change the app-card page |
-| Pause / Resume | Hide or restore ambient roots |
-| Still | Keep eligible roots visible without animation |
-| Done / blank background | Close Trace |
-| Retry, when disconnected | Ask for a fresh desktop connection |
+| A window in a tile | Jump straight to that window, on any workspace |
+| A workspace tile | Switch to that workspace |
+| Previous / Next | Change page when the tiles do not fit |
+| Pause / Still / Done | Hide roots, stop motion, or close Trace |
+| Blank background | Close Trace |
 
-## Cards fit the screen
+Keyboard focus stays with your application while Trace is open. To bind a key, call `omarchy-shell nixfred.mycelium trace`.
 
-When spatial labels would collide, Trace uses bounded app pages instead of scrolling. Previous, Next and page counts stay visible at normal text size. It reaches all 48 windows supported by the bridge. Live closures and resizes clamp the selected page; reopening Trace or changing workspace starts at page one.
+<p align="center"><img src="docs/images/native-compact.png" alt="Actual native compact Trace at 320×360: two workspace tiles per page with page controls" width="320" /></p>
 
-![Native v3 at a logical 960×540 viewport and 2× scale: 25 app cards per page, page controls and twelve workspace portals](docs/images/native-pages.png)
+When tiles would get too small, Trace pages instead of scrolling. It was checked down to 320×360 logical pixels, where two tiles fit per page.
 
-The compact view was checked down to 320×360 logical pixels. At that size, one app card fits per page while the workspace controls remain accessible. On an even smaller output, Trace can report that more room is needed rather than place cards over its controls.
+## Privacy and limits
 
-<p align="center"><img src="docs/images/native-compact.png" alt="Actual native compact Trace at 320×360, with one app card per page and all twelve workspace portals" width="320" /></p>
+Mycelium reads window rectangles, app classes, workspace and monitor layout, focus, urgency and fullscreen state. It never reads window titles, pixels inside applications, audio or the clipboard. Only random visual seeds and the Pause and Still settings are saved. Workspace hops live in memory and are never written to disk. Ambient roots pass all pointer input through to your desktop. Geometry probes run at most twice a second, and only while you are active.
 
-## Quiet when you need it
+- With both gaps **and** borders set to 0 there is no space between windows at all. Seams then sit on the shared edge and overlap the outermost pixel of each window.
+- Roots are drawn for up to 24 tiled windows per output; windows past that bound cover the roots instead. The bridge accepts 48 windows and 24 workspaces.
+- Hyprland reports no event while you drag-resize a window. The roots hide on the next geometry probe and grow back when the layout settles, so for up to half a second a seam can trail a moving edge.
+- App labels come from desktop entries and window classes, so several windows of one app share a label.
 
-![Native ambient mode in Still: roots remain in gaps and workspace navigation chrome is absent](docs/images/native-ambient.png)
-
-Ambient roots pass pointer input through to your desktop. True fullscreen, an off output, Pause, or an unavailable connection suppress eligible drawing and animation. Still disables motion. Geometry probes are capped at 2 Hz while the service is active and a visible output is eligible, with idle polling at zero. Ordinary desktop changes arrive through compositor events.
-
-Only visual seeds and the Pause/Still booleans persist locally. No focus history is written to disk. See [privacy, bounds and verification](docs/VERIFICATION.md).
-
-## Known limits
-
-- Tiny or completely occupied gaps can leave no room for roots; Trace's app cards can still be useful.
-- The bridge accepts up to 48 windows. The bounded visual topology uses up to 24 root nodes, 32 observed links and 64 paths. Trace shows up to twelve other workspace portals.
-- App identity comes from desktop entries and app classes, so multiple windows of the same app can share a label. Icons fall back when an entry is unavailable.
-- Native tests use synthetic fixtures. The development desktop currently runs the earlier v2; a live v3 activation result is not claimed here.
+See [verification](docs/VERIFICATION.md) and the [requirements](docs/REQUIREMENTS.md).
 
 ## Develop and verify
 
-The plugin runtime is `manifest.json`, `bridge.py` and the five files in `v3/`. The portable test suite exercises the actual bridge and geometry, not a duplicate implementation. [Development guide](docs/DEVELOPMENT.md) · [review decisions and validation](docs/VERIFICATION.md).
+The runtime is `manifest.json`, `bridge.py` and the five files in `v4/`. The test suite exercises the real bridge, geometry and QML, not a copy of them. [Development guide](docs/DEVELOPMENT.md).
 
 ```bash
 python3 tools/verify-runtime.py

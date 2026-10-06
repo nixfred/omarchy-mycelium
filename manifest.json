@@ -2,19 +2,19 @@
   "schemaVersion": 1,
   "id": "nixfred.mycelium",
   "name": "Mycelium",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "author": "Fred Nix",
   "license": "MIT",
-  "description": "Roots in real window gaps respond to focus and layout changes. Trace explains their state and navigates actual apps/workspaces. Standalone and local.",
+  "description": "Roots grow along the seams between your windows, at any gap size, and answer focus, layout and attention. Trace maps every workspace and jumps to any window. Standalone and local.",
   "kinds": [
     "service",
     "overlay",
     "bar-widget"
   ],
   "entryPoints": {
-    "service": "v3/Service.qml",
-    "overlay": "v3/Trace.qml",
-    "barWidget": "v3/Widget.qml"
+    "service": "v4/Service.qml",
+    "overlay": "v4/Trace.qml",
+    "barWidget": "v4/Widget.qml"
   },
   "barWidget": {
     "displayName": "Mycelium",

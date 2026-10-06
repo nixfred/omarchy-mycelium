@@ -4,9 +4,9 @@ import re,xml.etree.ElementTree as ET,subprocess
 
 root=Path(__file__).resolve().parents[1]
 files=[root/'README.md',root/'LICENSE',root/'.gitignore']
-for folder in ['v3','tests','tools','.github','docs/images']:
+for folder in ['v4','tests','tools','.github','docs/images']:
     files.extend(p for p in (root/folder).rglob('*') if p.is_file() and '__pycache__' not in p.parts)
-files.extend(root/'docs'/name for name in ['INSTALL.md','DEVELOPMENT.md','VERIFICATION.md'])
+files.extend(root/'docs'/name for name in ['INSTALL.md','DEVELOPMENT.md','VERIFICATION.md','REQUIREMENTS.md'])
 files.append(root/'bridge.py');files.append(root/'manifest.json')
 # A durable checkout can retain ignored local-only handoff tools and evidence.
 # Scan the exact public Git index there; a standalone publication draft uses

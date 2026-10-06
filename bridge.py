@@ -61,7 +61,7 @@ def normalize(clients, monitors, workspaces, active):
     windows.append({"id": address, "x": at[0], "y": at[1], "w": size[0], "h": size[1],
                     "app": str(c.get("class", ""))[:96], "workspace": workspace(c),
                     "monitor": c.get("monitor", -1), "urgent": bool(c.get("urgent", False)),
-                    "fullscreen": covered,
+                    "fullscreen": covered, "floating": bool(c.get("floating", False)),
                     "group": [str(a) for a in group if re.fullmatch(r"0x[0-9a-fA-F]+", str(a))][:MAX_WINDOWS]})
     if len(windows) >= MAX_WINDOWS:
       break
@@ -75,13 +75,23 @@ def normalize(clients, monitors, workspaces, active):
     transform = m.get("transform", 0)
     transform = transform if type(transform) is int else 0
     ws = m.get("activeWorkspace", {})
+    # Reserved edges (the bar) as [left, top, right, bottom] logical pixels.
+    reserved = m.get("reserved", [])
+    reserved = [v for v in reserved if numeric(v)][:4] if isinstance(reserved, list) else []
+    reserved = reserved if len(reserved) == 4 else [0, 0, 0, 0]
+    special = m.get("specialWorkspace", {})
     outputs.append({"id": m["id"], "name": m["name"][:96], "x": m["x"], "y": m["y"],
                     "width": (m["height"] if transform % 2 else m["width"]) / scale,
                     "height": (m["width"] if transform % 2 else m["height"]) / scale,
                     "workspace": ws.get("id", 0) if isinstance(ws, dict) else 0,
-                    "off": bool(m.get("disabled") or not m.get("dpmsStatus", True)), "transform": transform})
+                    "off": bool(m.get("disabled") or not m.get("dpmsStatus", True)), "transform": transform,
+                    "focused": bool(m.get("focused", False)), "reserved": reserved,
+                    # An open scratchpad (special workspace) covers the tiled layer.
+                    "special": special.get("id", 0) if isinstance(special, dict) and type(special.get("id", 0)) is int else 0})
   return {"windows": windows, "focus": str(active.get("address", "")), "monitors": outputs,
-          "workspaces": [{"id": w["id"], "name": str(w.get("name", w["id"]))[:48]} for w in workspaces[:MAX_WORKSPACES] if isinstance(w, dict) and type(w.get("id")) is int]}
+          "workspaces": [{"id": w["id"], "name": str(w.get("name", w["id"]))[:48],
+                          "monitor": w["monitorID"] if type(w.get("monitorID")) is int else -1}
+                         for w in workspaces[:MAX_WORKSPACES] if isinstance(w, dict) and type(w.get("id")) is int]}
 
 
 def snapshot():

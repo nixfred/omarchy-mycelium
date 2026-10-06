@@ -14,7 +14,7 @@ The manifest ID is `nixfred.mycelium`. The plugin has a service, an explicit ove
 omarchy plugin update nixfred.mycelium
 ```
 
-You can review before enabling by omitting `--enable`, then run `omarchy plugin enable nixfred.mycelium` yourself. Disabling uses `omarchy plugin disable nixfred.mycelium`. The shell discovers the versioned v3 QML entry points; no whole-shell restart is part of the normal install route.
+You can review before enabling by omitting `--enable`, then run `omarchy plugin enable nixfred.mycelium` yourself. Disabling uses `omarchy plugin disable nixfred.mycelium`. The shell discovers the versioned v4 QML entry points; no whole-shell restart is part of the normal install route.
 
 ## Source checkout
 
@@ -29,6 +29,5 @@ For a clean destination, Omarchy also documents manual installation: place only 
 
 ## Existing manual installation
 
-`plugin add` refuses an existing plugin destination. Do not overwrite an active plugin with a repository clone or restore an old whole shell configuration. First preserve the current plugin and its current placement/settings. Use a separately coordinated, Mycelium-only update that unloads the old service, places the validated v3 runtime with the manifest last, rescans plugins, and restores the freshly captured configuration through the shell's `compareAndSetShellConfig` API. This avoids resetting the user's bar order or racing another plugin update.
+`plugin add` refuses an existing plugin destination. Do not overwrite an active plugin with a repository clone or restore an old whole shell configuration. First preserve the current plugin and its current placement/settings. Update the plugin in place instead: copy the validated `v4/` folder and `bridge.py` first, then `manifest.json` last, so the shell switches entry points once. The plugin ID does not change, so the bar widget keeps its place and settings. Older `v2/` or `v3/` folders can be removed afterwards. Restart the shell once (`omarchy restart shell`) so the plugin's IPC target is fresh.
 
-The development desktop's manually installed v2 has not yet been activated to v3. Its local manual-update helper and private backup records are intentionally not shipped in this public repository. The public runtime is tested; no live v3 activation outcome is claimed.

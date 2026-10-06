@@ -2,41 +2,57 @@
 
 ## What the plugin uses
 
-The bridge reads current window addresses, app classes, rectangles, monitor/workspace identities, focus, groups, urgency and fullscreen/output state. It does not retain titles or application contents. Native screenshots in this repository render invented fixtures; they do not capture anyone's real application contents.
+The bridge reads current window addresses, app classes, rectangles, the floating flag, monitor and workspace identities, the monitor's reserved edges (the bar) and open scratchpad, focus, groups, urgency and fullscreen or output state. It never retains titles or application contents. Native screenshots in this repository render invented fixtures; they do not capture anyone's real desktop.
 
-The watch loop listens for compositor events and coalesces bursts. Geometry checks run at most twice per second while active and eligible; idle polling is zero. The local visual state contains at most 32 random visual seeds and two booleans. Observed links and focus state live in memory and are reset on disconnection. Ambient surfaces are click-through; explicit app/workspace clicks validate a live target in both QML and Python before dispatch.
+The watch loop listens for compositor events and coalesces bursts. Geometry checks run at most twice per second while the user is active and an output is visible; idle polling is zero. Still mode keeps geometry checks on, because seams sit on window borders and must follow a resize even when nothing animates. The local visual state holds 32 random visual seeds and two booleans. Workspace hops, focus and pulse state live in memory and reset on disconnection. Ambient surfaces are click-through with no keyboard focus. Explicit window and workspace clicks validate a live target in both QML and Python before dispatch.
 
-Structural roots are decorative geometry. Focus links represent observed focus changes; group links represent actual compositor groups. No link infers content exchange or a private semantic relationship. There is no Infomarchy feed, adapter or dependency.
+## Why v4 changed the design
 
-## Reviewed decisions
+v3 routed roots through empty space around windows. In real tiling layouts that space is 0 to 12 px, so on the development desktop (one window per workspace, 9 px outer margins) nothing visible was drawn, and Trace mapped only the current workspace. v4 draws on seams, which exist at every gap size, and maps every workspace. [REQUIREMENTS.md](REQUIREMENTS.md) lists the contract.
 
-The existing full Kimi K3 reviews were preserved locally; this repository carries their accepted decisions without private transcript/log records.
+## Geometry rules
 
-| Finding or design question | Result |
+| Rule | How it is enforced |
 | --- | --- |
-| Batched or fragmented stdin commands could stall in a buffered read | Bounded `os.read` draining handles complete lines, partial tails and EOF; event-loop regression test covers it. |
-| Transient QML initialization could read unset coordinates | Snapshot guards and native cold-component creation checks cover it. |
-| Actual 9px outer / 12px tiled gaps were smaller than the old routing offsets | Smaller gap-safe anchors and bounded knots/branches were verified with routing and pixel comparisons. |
-| Hyprland maximized mode was mistaken for true fullscreen | Integer mode2 suppresses ambient; mode1 maximized retains eligible margins. Legacy boolean true remains supported. |
-| Duplicate geometry frames cancelled a focus pulse | Unchanged frames preserve the current bounded pulse. |
-| Overlapping Trace labels hid live app targets | Global finite pages replace collision-prone placement while preserving spatial cards when they fit. |
-| Compact status text could overlap toolbar controls | Narrow status width and compact count/workspace text preserve readable controls. |
-| Pager gaps or the page label could dismiss Trace | A bounded background hitbox absorbs those clicks; buttons retain their page actions. |
-| Removing portal-reserved space could recover rows | Declined: it would overlap actual workspace controls. The compact fixture still fits down to320×360. |
+| A side facing a neighbour sits at half the gap | `insets()`; neighbouring frames coincide exactly and merge into one seam |
+| A side facing the screen edge sits mid-margin | Capped at 12 px; a margin under 1 px leaves the side open (not drawn) |
+| Off-screen windows (scrolling layouts) | Fully off-screen windows are skipped; sides beyond the edge stay open |
+| Overlapping tiled windows | The overlapped side stays open |
+| Waviness and glow | Amplitude plus glow half-width plus line half-width never exceed the side's inset |
+| Floating windows, overflow windows, scratchpad | Occluders: every root is cut exactly (Liang–Barsky) with room for its glow |
+| Layout change or workspace switch | Seams hide immediately and regrow once geometry is stable for 450 ms |
+| Motion budget | One urgent window pulses across all outputs; everything else moves only in response to an event |
 
-No completed expensive full audit was repeated for the pagination change. Its focused correction review found no remaining correctness regression. Final fixture measurements tightened compact padding by 4px afterward; navigation logic was unchanged and final native tests used the resulting runtime hash.
+## Independent review
+
+A separate reviewer read the v4 runtime against these rules before release and reproduced its findings in node. Accepted and fixed:
+
+| Finding | Result |
+| --- | --- |
+| Frames were clamped back onto the screen, putting lines inside windows that extend off-screen (scrolling layout) | Off-screen sides are open; fully off-screen windows are skipped; regression test with windows off both edges |
+| A lone window with margins of 64 px or more got a zero inset | Each screen-facing side uses its own margin, capped at 12 px |
+| A window flush with the screen edge got a line half on its content | Margins under 1 px leave the side open |
+| Overlapping tiled windows treated the overlapped side as the screen edge | That side is open |
+| The occluder cut ignored the glow width | The cut distance includes the glow half-width plus a spare pixel |
+| Windows past the 24-window bound and an open scratchpad were neither framed nor occluding | Both are occluders now |
+| Two outputs could each pulse an urgent window | One pulse, chosen across all outputs |
+| A workspace switch drew seams while Hyprland slid windows in | Workspace and scratchpad changes count as layout changes |
+| Trace could read a null controller during startup | Guarded |
+
+Declined: recording hops only on same-monitor workspace switches. Moving focus to another monitor's workspace is a move between workspaces, so it stays a hop.
 
 ## Verification matrix
 
-Eight Python tests and the pure topology/tiled/resource suites pass. Native pointer tests enter every one of 48 app cards, check Previous/Next/page-label behavior, resize only the disposable fixture, preserve pages during same-workspace changes, clamp after removal, reject stale IDs and reset on workspace changes.
+| Suite | What it proves |
+| --- | --- |
+| `tests/test_bridge.py`, `tests/test_watch.py` | Normalisation, privacy bounds, preferences, live-target validation, the real watch loop on a disposable compositor socket |
+| `tests/test_topology.js` | Seams at 0, 1/2 and 9/12 px gaps, single window, floating occluder with glow, growth origin, spark paths, scrolling-layout and overlap regressions, scratchpad, 80-window stress, the Trace map and its pages |
+| `tests/test_tiled.js` | 64 tiled layouts (960 to 2560 px wide, gaps 0/0, 1/2, 9/12, 21/22, one to five windows), plus the real status strings from `Service.qml` |
+| `tests/test_resources.js` | The real QML geometry and render gates |
+| `tests/isolated_native.py` | Production QML on a private X display: seams, focus growth, spark, settle, single pulse, layout regrow, gates, outage reset, Trace map, window and workspace clicks, backdrop dismissal, stale targets, and a **pixel audit** |
+| `tests/native_pagination.py` | Every one of 24 workspaces reached through real pager clicks at 1920×1080, 960×540, 320×360 and 2× scale, with no binding loops |
+| `tests/native_compile.py` | Production Wayland types load hidden in a real session |
 
-| Logical viewport | Scale | Cards per page | Pages for48 apps |
-| --- | --- | --- | --- |
-| 960×540 | 1× | 25 | 2 |
-| 480×360 | 1× | 2 | 24 |
-| 320×360 | 1× | 1 | 48 |
-| 960×540 | 2× | 25 | 2 |
+The pixel audit renders each layout twice, with and without roots. It requires zero changed pixels inside every window and more than 1,500 changed seam pixels. Last run: 18,746 (9/12 gaps), 9,342 (zero gaps), 20,353 (one window) and 16,867 (floating window) changed pixels, all outside windows.
 
-The existing native event/pulse/duplicate-frame, app/workspace, blank dismissal, overlap, stale-ID, move/close/urgency, outage and hidden/fullscreen/off/Still/Pause tests pass. Production Wayland types load in a hidden fixture. Geometry at logical widths960–2560 avoids app interiors; previous native tiled pixel comparisons found zero changed application-interior pixels.
-
-The runtime baseline sourceTreeSHA256 is `500a79c63b665124c77e2b0cd246df597dcb5be3e184bc4f09a6b2f052293f10`. A live v3 activation on the development desktop is still pending. No v3 live resource benchmark is claimed: earlier samples were brief whole-fixture or bridge-only samples, not long-duration or incremental plugin-memory measurements.
+The runtime baseline is recorded in `tools/runtime-hashes.json`.
